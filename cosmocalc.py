@@ -77,6 +77,15 @@ def tage_to_z(cosmo, tage):
         print(f"tage = {tage}, z = {z:.4f}")
     except (ValueError, TypeError):
         raise ValueError("Invalid age of the Universe. Please provide a valid age of the Universe in Myrs.")
+    
+def time_between_z(cosmo, z1, z2):
+    try:
+        z1 = float(eval(z1)) * cu.redshift
+        z2 = float(eval(z2)) * cu.redshift
+        dt = np.abs(cosmo.age(z1).to(u.Myr) - cosmo.age(z2).to(u.Myr))
+        print(f"z1 = {z1}, z2 = {z2}, dt = {dt:.4f}")
+    except (ValueError, TypeError):
+        raise ValueError("Invalid redshifts. Please provide valid redshifts.")
 
 def H_at_z(cosmo, z):
     try: 
@@ -131,6 +140,7 @@ def main():
     functions = {
         'z_to_tage': ['Calculate the age of the Universe at a given redshift', z_to_tage],
         'tage_to_z': ['Calculate the redshift at a given age of the Universe', tage_to_z],
+        'time_between_z': ['Calculate the time between two redshifts', time_between_z],
         'H_at_z': ['Calculate the Hubble parameter at a given redshift', H_at_z],
         'print_cosmo': ['Print the cosmological parameters', print_cosmo],
         'comoving_to_deg': ['Convert comoving distance to angular size', comoving_to_deg],
@@ -168,6 +178,8 @@ def main():
             f(cosmo, args.redshift)
         elif args.function == 'tage_to_z':
             f(cosmo, args.tage)
+        elif args.function == 'time_between_z':
+            f(cosmo, args.redshift, args.redshift2)
         elif args.function == 'comoving_to_deg':
             f(cosmo, args.redshift, args.comoving)
         elif args.function == 'deg_to_comoving':
