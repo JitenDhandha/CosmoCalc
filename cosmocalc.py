@@ -17,7 +17,7 @@ def set_cosmo(cosmo_name):
     elif cosmo_name == 'WMAP7':
         cosmo = WMAP7
     else:
-        raise ValueError("Invalid cosmology name. Please choose one of the following: 'Planck18', 'Planck15', 'Planck13', 'WMAP9', 'WMAP7'")
+        raise ValueError("Invalid cosmology name.")
     return cosmo
 
 def print_cosmo(cosmo):
@@ -140,14 +140,23 @@ def main():
     }
 
     parser = argparse.ArgumentParser(description='Cosmology Calculator Tool, by Jiten Dhandha')
-    parser.add_argument('-f','--function', type=str, help=f'Function to calculate: {", ".join(functions.keys())}')
-    parser.add_argument('-c','--cosmology', type=str, default='Planck18', help='Name of the cosmology to use')
-    parser.add_argument('-z','--redshift', type=str, help="Input redshift")
-    parser.add_argument('-z2','--redshift2', type=str, help="Input redshift 2")
-    parser.add_argument('-t','--tage', type=str, help='Age of the Universe in Myr')
-    parser.add_argument('-x','--comoving', type=str, help='Comoving distance in Mpc')
-    parser.add_argument('-theta','--angular_sep', type=str, help='Angular size in deg')
-    parser.add_argument('-omega','--angular_area', type=str, help='Angular area in deg^2')
+    parser.add_argument('-f','--function', type=str, nargs='?',
+                        help=f'Function to calculate: {", ".join(functions.keys())}', required=True)
+    parser.add_argument('-c','--cosmology', type=str, nargs='?',
+                        default='Planck18', 
+                        help='Name of the cosmology to use (default: Planck18, options: Planck18, Planck15, Planck13, WMAP9, WMAP7)')
+    parser.add_argument('-z','--redshift', type=str, nargs='?',
+                        help="First input redshift")
+    parser.add_argument('-z2','--redshift2', type=str, nargs='?',
+                        help="Second input redshift (for volume calculations)")
+    parser.add_argument('-t','--tage', type=str, nargs='?',
+                        help='Age of the Universe in Myr')
+    parser.add_argument('-x','--comoving', type=str, nargs='?',
+                        help='Comoving distance in Mpc')
+    parser.add_argument('-theta','--angular_sep', type=str, nargs='?',
+                        help='Angular size in deg')
+    parser.add_argument('-omega','--angular_area', type=str, nargs='?',
+                        help='Angular area in deg^2')
     args = parser.parse_args()
     cosmo = set_cosmo(args.cosmology)
     
