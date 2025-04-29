@@ -5,6 +5,7 @@ This is a simple command line tool for printing the cosmological parameters or c
 * Hubble parameter at a given redshift
 * Age of the universe at a given redshift
 * Redshift at a given age of the universe
+* Time between two redshifts
 * Comoving length to angular degree
 * Angular degree to comoving length
 * Angular area to comoving area
@@ -27,4 +28,10 @@ cosmocalc --function "z_to_tage" --redshift 20 --cosmology Planck18
 cosmocalc -f "z_to_tage" -z 20 -c Planck18
 ```
 
-Both are equivalent and will calculate the age of the universe at redshift 20 using the Planck 2018 cosmology. You can also use the `--help` flag to see all available options:
+Both are equivalent and will calculate the age of the universe at redshift 20 using the Planck 2018 cosmology. You can also use the `--help` flag to see all available options. Instead of supplying numbers, you can also supply strings with math operations, such as:
+
+```
+cosmocalc -f "time_between_z" -z "1080-80/2" -z2 "1080+80/2"
+```
+
+which is roughly the duration of the Recombination event!
