@@ -134,6 +134,26 @@ def deg2_to_comoving_volume(cosmo, z1, z2, omega):
         print(f"z1 = {z1}, z2 = {z2}, omega = {omega:.4f}, V = {V:.4f}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshifts or angular area. Please provide valid redshifts and angular area.")
+
+def comoving_to_proper(cosmo, z, x):
+    try:
+        z = float(eval(z))
+        x = float(eval(x))
+        a = cosmo.scale_factor(z)
+        y = x * a
+        print(f"z = {z}, x = {x:.4f} cMpc --> y = {y:.4f} pMpc")
+    except (ValueError, TypeError):
+        raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
+
+def proper_to_comoving(cosmo, z, y):
+    try:
+        z = float(eval(z))
+        y = float(eval(y))
+        a = cosmo.scale_factor(z)
+        x = y / a
+        print(f"z = {z}, y = {y:.4f} pMpc --> x = {x:.4f} cMpc")
+    except (ValueError, TypeError):
+        raise ValueError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
         
 def main():
     
@@ -147,6 +167,8 @@ def main():
         'deg_to_comoving': ['Convert angular size to comoving distance', deg_to_comoving],
         'deg2_to_comoving_area': ['Convert angular area to comoving area', deg2_to_comoving_area],
         'deg2_to_comoving_volume': ['Convert angular area to comoving volume', deg2_to_comoving_volume],
+        'comoving_to_proper': ['Convert comoving distance to proper distance', comoving_to_proper],
+        'proper_to_comoving': ['Convert proper distance to comoving distance', proper_to_comoving],
     }
 
     parser = argparse.ArgumentParser(description='Cosmology Calculator Tool, by Jiten Dhandha')
@@ -163,6 +185,8 @@ def main():
                         help='Age of the Universe in Myr')
     parser.add_argument('-x','--comoving', type=str, nargs='?',
                         help='Comoving distance in Mpc')
+    parser.add_argument('-y','--proper', type=str, nargs='?',
+                        help='Proper distance in Mpc')
     parser.add_argument('-theta','--angular_sep', type=str, nargs='?',
                         help='Angular size in deg')
     parser.add_argument('-omega','--angular_area', type=str, nargs='?',
@@ -188,6 +212,10 @@ def main():
             f(cosmo, args.redshift, args.angular_area)
         elif args.function == 'deg2_to_comoving_volume':
             f(cosmo, args.redshift, args.redshift2, args.angular_area)
+        elif args.function == 'comoving_to_proper':
+            f(cosmo, args.redshift, args.comoving)
+        elif args.function == 'proper_to_comoving':
+            f(cosmo, args.redshift, args.proper)
         elif args.function == 'H_at_z':
             f(cosmo, args.redshift)
         elif args.function == 'print_cosmo':

@@ -10,6 +10,8 @@ This is a simple command line tool for printing the cosmological parameters or c
 * Angular degree to comoving length
 * Angular area to comoving area
 * Angular area to comoving volume
+* Comoving length to proper length at a given redshift
+* Proper length to comoving length at a given redshift
 
 It is written in Python and uses the `astropy` library for cosmological calculations. The cosmologies supported currently are: WMAP7, WMAP9, Planck13, Planck15, Planck18.
 
