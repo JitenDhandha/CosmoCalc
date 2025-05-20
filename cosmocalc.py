@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.cosmology import Planck18, Planck15, Planck13, WMAP9, WMAP7, z_at_value
+from astropy.cosmology import Planck18, Planck15, Planck13, WMAP9, WMAP7, FlatLambdaCDM, z_at_value
 import astropy.cosmology.units as cu
 import astropy.units as u
 import argparse
@@ -17,7 +17,10 @@ def set_cosmo(cosmo_name):
     elif cosmo_name == 'WMAP7':
         cosmo = WMAP7
     else:
-        raise ValueError("Invalid cosmology name.")
+        try:
+            cosmo = FlatLambdaCDM(eval(cosmo_name))
+        except:
+            raise ValueError("Invalid cosmology name.")
     return cosmo
 
 def print_cosmo(cosmo):
