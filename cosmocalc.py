@@ -157,7 +157,19 @@ def proper_to_comoving(cosmo, z, y):
         print(f"z = {z}, y = {y:.4f} pMpc --> x = {x:.4f} cMpc")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
-        
+    
+def photon_unit_conversion(photon_unit_str):
+    inputs = photon_unit_str.split(' ')
+    try:
+        value = float(eval(inputs[0]))
+        from_unit = u.Unit(inputs[1])
+        to_unit = u.Unit(inputs[3])
+        quantity = value * from_unit
+        converted_quantity = quantity.to(to_unit, equivalencies=u.spectral())
+        print(f"{quantity} = {converted_quantity:.4e}")
+    except (ValueError, TypeError, IndexError):
+        raise ValueError('Invalid photon unit conversion string. Please provide a valid conversion string, e.g. "21 cm to MHz" (spaces required).')
+       
 def main():
     
     functions = {
@@ -172,6 +184,7 @@ def main():
         'deg2_to_comoving_volume': ['Convert angular area to comoving volume', deg2_to_comoving_volume],
         'comoving_to_proper': ['Convert comoving distance to proper distance', comoving_to_proper],
         'proper_to_comoving': ['Convert proper distance to comoving distance', proper_to_comoving],
+        'photon_unit_conversion': ['Convert between different photon units', photon_unit_conversion],
     }
 
     parser = argparse.ArgumentParser(description='Cosmology Calculator Tool, by Jiten Dhandha')
@@ -194,6 +207,8 @@ def main():
                         help='Angular size in deg')
     parser.add_argument('-omega','--angular_area', type=str, nargs='?',
                         help='Angular area in deg^2')
+    parser.add_argument('-p','--photon_unit_str', type=str, nargs='?',
+                        help='Photon unit conversion input string, e.g. "21 cm to MHz" (spaces required)')
     args = parser.parse_args()
     cosmo = set_cosmo(args.cosmology)
     
@@ -221,6 +236,8 @@ def main():
             f(cosmo, args.redshift, args.proper)
         elif args.function == 'H_at_z':
             f(cosmo, args.redshift)
+        elif args.function == 'photon_unit_conversion':
+            f(args.photon_unit_str)
         elif args.function == 'print_cosmo':
             f(cosmo)
         
