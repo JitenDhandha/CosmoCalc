@@ -26,12 +26,12 @@ def set_cosmo(cosmo_name):
 def print_cosmo(cosmo):
     
     print(f"Name: {cosmo.name}", end=', ')
-    print(f"H0 = {cosmo.H0:.4f}", end=', ')
-    print(f"Om0 = {cosmo.Om0:.4f}", end=', ')
-    print(f"Ode0 = {cosmo.Ode0:.4f}", end=', ')
-    print(f"Ok0 = {cosmo.Ok0:.4f}", end=', ')
-    print(f"Ob0 = {cosmo.Ob0:.4f}", end=', ')
-    print(f"Neff = {cosmo.Neff:.4f}")
+    print(f"H0 = {cosmo.H0:.4e}", end=', ')
+    print(f"Om0 = {cosmo.Om0:.4e}", end=', ')
+    print(f"Ode0 = {cosmo.Ode0:.4e}", end=', ')
+    print(f"Ok0 = {cosmo.Ok0:.4e}", end=', ')
+    print(f"Ob0 = {cosmo.Ob0:.4e}", end=', ')
+    print(f"Neff = {cosmo.Neff:.4e}")
     
 def z_to_tage(cosmo, z):
     
@@ -40,7 +40,7 @@ def z_to_tage(cosmo, z):
         tage_imp = cosmo.age(z_imp).to(u.Myr)
         print("Important redshifts:")
         for i in range(len(z_imp)):
-            print(f"z = {z_imp[i]}, tage = {tage_imp[i]:.4f}")
+            print(f"z = {z_imp[i]}, tage = {tage_imp[i]:.4e}")
             
     elif z == 'plot':
         zmin = 1e-1
@@ -69,7 +69,7 @@ def z_to_tage(cosmo, z):
         try: 
             z = float(eval(z)) * cu.redshift
             tage = cosmo.age(z).to(u.Myr)
-            print(f"z = {z}, tage = {tage:.4f}")
+            print(f"z = {z}, tage = {tage:.4e}")
         except (ValueError, TypeError):
             raise ValueError("Invalid redshift. Please provide a valid redshift, 'imp' or 'plot'")
         
@@ -77,7 +77,7 @@ def tage_to_z(cosmo, tage):
     try:
         tage = float(eval(tage)) * u.Myr
         z = z_at_value(cosmo.age, tage)
-        print(f"tage = {tage}, z = {z:.4f}")
+        print(f"tage = {tage}, z = {z:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid age of the Universe. Please provide a valid age of the Universe in Myrs.")
     
@@ -86,7 +86,7 @@ def time_between_z(cosmo, z1, z2):
         z1 = float(eval(z1)) * cu.redshift
         z2 = float(eval(z2)) * cu.redshift
         dt = np.abs(cosmo.age(z1).to(u.Myr) - cosmo.age(z2).to(u.Myr))
-        print(f"z1 = {z1}, z2 = {z2}, dt = {dt:.4f}")
+        print(f"z1 = {z1}, z2 = {z2}, dt = {dt:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshifts. Please provide valid redshifts.")
 
@@ -94,7 +94,7 @@ def H_at_z(cosmo, z):
     try: 
         z = float(eval(z))
         Hz = cosmo.H(z)
-        print(f"z = {z}, H(z) = {Hz:.4f}")
+        print(f"z = {z}, H(z) = {Hz:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift. Please provide a valid redshift.")
     
@@ -104,7 +104,7 @@ def comoving_to_deg(cosmo, z, x):
         x = float(eval(x)) * u.Mpc
         theta = cosmo.arcsec_per_kpc_comoving(z) * x.to(u.kpc)
         theta = theta.to(u.deg)
-        print(f"z = {z}, x = {x}, theta = {theta:.4f}")
+        print(f"z = {z}, x = {x}, theta = {theta:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
 
@@ -114,7 +114,7 @@ def deg_to_comoving(cosmo, z, theta):
         theta = float(eval(theta)) * u.deg
         x = theta.to(u.arcsec) / cosmo.arcsec_per_kpc_comoving(z)
         x = x.to(u.Mpc)
-        print(f"z = {z}, theta = {theta:.4f}, x = {x:.4f}")
+        print(f"z = {z}, theta = {theta:.4e}, x = {x:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or angular size. Please provide a valid redshift and angular size.")
     
@@ -124,7 +124,7 @@ def deg2_to_comoving_area(cosmo, z, omega):
         omega = float(eval(omega)) * u.deg**2
         A = omega.to(u.arcsec**2) / cosmo.arcsec_per_kpc_comoving(z)**2 
         A = A.to(u.Mpc**2)
-        print(f"z = {z}, omega = {omega:.4f}, A = {A:.4f}")
+        print(f"z = {z}, omega = {omega:.4e}, A = {A:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or angular area. Please provide a valid redshift and angular area.")
     
@@ -134,7 +134,7 @@ def deg2_to_comoving_volume(cosmo, z1, z2, omega):
         z2 = float(eval(z2)) * cu.redshift
         omega = float(eval(omega)) * u.deg**2
         V = omega.to(u.steradian)/(4*np.pi*u.steradian) * abs(cosmo.comoving_volume(z1) - cosmo.comoving_volume(z2))
-        print(f"z1 = {z1}, z2 = {z2}, omega = {omega:.4f}, V = {V:.4f}")
+        print(f"z1 = {z1}, z2 = {z2}, omega = {omega:.4e}, V = {V:.4e}")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshifts or angular area. Please provide valid redshifts and angular area.")
 
@@ -144,7 +144,7 @@ def comoving_to_proper(cosmo, z, x):
         x = float(eval(x))
         a = cosmo.scale_factor(z)
         y = x * a
-        print(f"z = {z}, x = {x:.4f} cMpc --> y = {y:.4f} pMpc")
+        print(f"z = {z}, x = {x:.4e} cMpc --> y = {y:.4e} pMpc")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
 
@@ -154,7 +154,7 @@ def proper_to_comoving(cosmo, z, y):
         y = float(eval(y))
         a = cosmo.scale_factor(z)
         x = y / a
-        print(f"z = {z}, y = {y:.4f} pMpc --> x = {x:.4f} cMpc")
+        print(f"z = {z}, y = {y:.4e} pMpc --> x = {x:.4e} cMpc")
     except (ValueError, TypeError):
         raise ValueError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
     
