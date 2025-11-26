@@ -194,7 +194,7 @@ def main():
                         default='Planck18', 
                         help='Name of the cosmology to use (default: Planck18, options: Planck18, Planck15, Planck13, WMAP9, WMAP7)')
     parser.add_argument('-z','--redshift', type=str, nargs='?',
-                        help="First input redshift")
+                        help="First input redshift (in case of z_to_tage, 'imp' or 'plot' options are also accepted)")
     parser.add_argument('-z2','--redshift2', type=str, nargs='?',
                         help="Second input redshift (for volume calculations)")
     parser.add_argument('-t','--tage', type=str, nargs='?',
