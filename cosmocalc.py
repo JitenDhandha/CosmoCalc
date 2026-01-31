@@ -191,7 +191,7 @@ def H_at_z(
     """
     cosmo = set_cosmo(cosmology)
     try: 
-        z = float(eval(z))
+        z = float(eval(z)) * cu.redshift
         Hz = cosmo.H(z)
         print(f"z = {z}, H(z) = {Hz:.4e}")
     except (ValueError, TypeError, NameError):
@@ -333,7 +333,7 @@ def comoving_to_proper(
     """
     cosmo = set_cosmo(cosmology)
     try:
-        z = float(eval(z))
+        z = float(eval(z)) * cu.redshift
         x = float(eval(x))
         a = cosmo.scale_factor(z)
         y = x * a
@@ -361,7 +361,7 @@ def proper_to_comoving(
     """
     cosmo = set_cosmo(cosmology)
     try:
-        z = float(eval(z))
+        z = float(eval(z)) * cu.redshift
         y = float(eval(y))
         a = cosmo.scale_factor(z)
         x = y / a
