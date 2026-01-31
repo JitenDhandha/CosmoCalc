@@ -3,7 +3,10 @@ import matplotlib.pyplot as plt
 from astropy.cosmology import Planck18, Planck15, Planck13, WMAP9, WMAP7, FlatLambdaCDM, z_at_value
 import astropy.cosmology.units as cu
 import astropy.units as u
-import argparse
+from cyclopts import App, Parameter
+from typing import Annotated
+
+app = App(help="Cosmology Calculator Tool, by Jiten Dhandha", help_format="rich", print_error=True)
 
 def set_cosmo(cosmo_name):
     if cosmo_name == 'Planck18':
@@ -22,9 +25,20 @@ def set_cosmo(cosmo_name):
         except:
             raise ValueError("Invalid cosmology name.")
     return cosmo
-
-def print_cosmo(cosmo):
     
+@app.command
+def print_cosmo(
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Print the cosmological parameters.
+    
+    Parameters
+    ----------
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     print(f"Name: {cosmo.name}", end=', ')
     print(f"H0 = {cosmo.H0:.4e}", end=', ')
     print(f"Om0 = {cosmo.Om0:.4e}", end=', ')
@@ -32,9 +46,23 @@ def print_cosmo(cosmo):
     print(f"Ok0 = {cosmo.Ok0:.4e}", end=', ')
     print(f"Ob0 = {cosmo.Ob0:.4e}", end=', ')
     print(f"Neff = {cosmo.Neff:.4e}")
+        
+@app.command
+def z_to_tage(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the age of the Universe (in Myr) at a given redshift.
     
-def z_to_tage(cosmo, z):
-    
+    Parameters
+    ----------
+    z : str
+        Redshift value ('imp' for important redshifts, 'plot' for plotting, or numeric value)
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     if z == 'imp':
         z_imp = [6000,3400,2000,1100,200,80,65,30,20,12,6,0.3] * cu.redshift
         tage_imp = cosmo.age(z_imp).to(u.Myr)
@@ -70,95 +98,269 @@ def z_to_tage(cosmo, z):
             z = float(eval(z)) * cu.redshift
             tage = cosmo.age(z).to(u.Myr)
             print(f"z = {z}, tage = {tage:.4e}")
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, NameError):
             raise ValueError("Invalid redshift. Please provide a valid redshift, 'imp' or 'plot'")
-        
-def tage_to_z(cosmo, tage):
+    
+app.command  
+def tage_to_z(
+    tage: Annotated[str, Parameter(name=['-t', '--tage'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the redshift at a given age of the Universe (in Myr).
+
+    Parameters
+    ----------
+    tage : str
+        Age of the Universe in Myr
+    cosmology : str
+        Cosmology model to use
+    """
+    
+    cosmo = set_cosmo(cosmology)
     try:
         tage = float(eval(tage)) * u.Myr
         z = z_at_value(cosmo.age, tage)
         print(f"tage = {tage}, z = {z:.4e}")
-    except (ValueError, TypeError):
-        raise ValueError("Invalid age of the Universe. Please provide a valid age of the Universe in Myrs.")
+    except (ValueError, TypeError, NameError):
+        raise ValueError("Invalid age of the Universe. Please provide a valid age of the Universe in Myr.")    
+
+@app.command
+def time_between_z(
+    z1: Annotated[str, Parameter(name=['-z1', '--redshift1'])],
+    z2: Annotated[str, Parameter(name=['-z2', '--redshift2'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the time (in Myr) between two redshifts.
     
-def time_between_z(cosmo, z1, z2):
+    Parameters
+    ----------
+    z1 : str
+        First redshift value
+    z2 : str
+        Second redshift value
+    cosmology : str
+        Cosmology model to use
+    
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z1 = float(eval(z1)) * cu.redshift
         z2 = float(eval(z2)) * cu.redshift
         dt = np.abs(cosmo.age(z1).to(u.Myr) - cosmo.age(z2).to(u.Myr))
         print(f"z1 = {z1}, z2 = {z2}, dt = {dt:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshifts. Please provide valid redshifts.")
 
-def H_at_z(cosmo, z):
+@app.command
+def H_at_z(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the Hubble parameter (in km/s/Mpc) at a given redshift.
+    
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try: 
         z = float(eval(z))
         Hz = cosmo.H(z)
         print(f"z = {z}, H(z) = {Hz:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift. Please provide a valid redshift.")
+
+@app.command
+def comoving_to_deg(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    x: Annotated[str, Parameter(name=['-x', '--comoving_distance'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert comoving distance (in Mpc) at a given redshift to angular size (in deg).
     
-def comoving_to_deg(cosmo, z, x):
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    x : str
+        Comoving distance in Mpc
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z = float(eval(z)) * cu.redshift
         x = float(eval(x)) * u.Mpc
         theta = cosmo.arcsec_per_kpc_comoving(z) * x.to(u.kpc)
         theta = theta.to(u.deg)
         print(f"z = {z}, x = {x}, theta = {theta:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
-
-def deg_to_comoving(cosmo, z, theta):
+ 
+@app.command
+def deg_to_comoving(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    theta: Annotated[str, Parameter(name=['-t', '--angular_size'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert angular size (in deg) at a given redshift to comoving distance (in Mpc).
+    
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    theta : str
+        Angular size in deg
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z = float(eval(z)) * cu.redshift
         theta = float(eval(theta)) * u.deg
         x = theta.to(u.arcsec) / cosmo.arcsec_per_kpc_comoving(z)
         x = x.to(u.Mpc)
         print(f"z = {z}, theta = {theta:.4e}, x = {x:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift or angular size. Please provide a valid redshift and angular size.")
+
+@app.command
+def deg2_to_comoving_area(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    omega: Annotated[str, Parameter(name=['-o', '--angular_area'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert angular area (in deg^2) to comoving area (in Mpc^2) at a given redshift.
     
-def deg2_to_comoving_area(cosmo, z, omega):
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    omega : str
+        Angular area in deg^2
+    cosmology : str
+        Cosmology model to use
+    
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z = float(eval(z)) * cu.redshift
         omega = float(eval(omega)) * u.deg**2
         A = omega.to(u.arcsec**2) / cosmo.arcsec_per_kpc_comoving(z)**2 
         A = A.to(u.Mpc**2)
         print(f"z = {z}, omega = {omega:.4e}, A = {A:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift or angular area. Please provide a valid redshift and angular area.")
+
+@app.command
+def deg2_to_comoving_volume(
+    z1: Annotated[str, Parameter(name=['-z1', '--redshift1'])],
+    z2: Annotated[str, Parameter(name=['-z2', '--redshift2'])],
+    omega: Annotated[str, Parameter(name=['-o', '--angular_area'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert angular area (in deg^2) between two redshifts to comoving volume (in Mpc^3).
     
-def deg2_to_comoving_volume(cosmo, z1, z2, omega):
+    Parameters
+    ----------
+    z1 : str
+        First redshift value
+    z2 : str
+        Second redshift value
+    omega : str
+        Angular area in deg^2
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z1 = float(eval(z1)) * cu.redshift
         z2 = float(eval(z2)) * cu.redshift
         omega = float(eval(omega)) * u.deg**2
         V = omega.to(u.steradian)/(4*np.pi*u.steradian) * abs(cosmo.comoving_volume(z1) - cosmo.comoving_volume(z2))
         print(f"z1 = {z1}, z2 = {z2}, omega = {omega:.4e}, V = {V:.4e}")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshifts or angular area. Please provide valid redshifts and angular area.")
 
-def comoving_to_proper(cosmo, z, x):
+@app.command
+def comoving_to_proper(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    x: Annotated[str, Parameter(name=['-x', '--comoving_distance'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert comoving distance (in cMpc) at a given redshift to proper distance (in pMpc).
+    
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    x : str
+        Comoving distance in cMpc
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z = float(eval(z))
         x = float(eval(x))
         a = cosmo.scale_factor(z)
         y = x * a
         print(f"z = {z}, x = {x:.4e} cMpc --> y = {y:.4e} pMpc")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
 
-def proper_to_comoving(cosmo, z, y):
+@app.command
+def proper_to_comoving(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    y: Annotated[str, Parameter(name=['-y', '--proper_distance'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Convert proper distance (in pMpc) at a given redshift to comoving distance (in cMpc).
+    
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    y : str
+        Proper distance in pMpc
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
     try:
         z = float(eval(z))
         y = float(eval(y))
         a = cosmo.scale_factor(z)
         x = y / a
         print(f"z = {z}, y = {y:.4e} pMpc --> x = {x:.4e} cMpc")
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, NameError):
         raise ValueError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
+
+@app.command
+def photon_unit_conversion(
+    photon_unit_str: Annotated[str, Parameter(name=['-p', '--photon_unit_conversion'])]
+):
+    """
+    Convert between different photon units.
     
-def photon_unit_conversion(photon_unit_str):
+    Parameters
+    ----------
+    photon_unit_str : str
+        Photon unit conversion string (e.g. "21 cm to MHz", spaces required)
+    
+    """
     inputs = photon_unit_str.split(' ')
     try:
         value = float(eval(inputs[0]))
@@ -169,79 +371,6 @@ def photon_unit_conversion(photon_unit_str):
         print(f"{quantity} = {converted_quantity:.4e}")
     except (ValueError, TypeError, IndexError):
         raise ValueError('Invalid photon unit conversion string. Please provide a valid conversion string, e.g. "21 cm to MHz" (spaces required).')
-       
-def main():
-    
-    functions = {
-        'z_to_tage': ['Calculate the age of the Universe at a given redshift', z_to_tage],
-        'tage_to_z': ['Calculate the redshift at a given age of the Universe', tage_to_z],
-        'time_between_z': ['Calculate the time between two redshifts', time_between_z],
-        'H_at_z': ['Calculate the Hubble parameter at a given redshift', H_at_z],
-        'print_cosmo': ['Print the cosmological parameters', print_cosmo],
-        'comoving_to_deg': ['Convert comoving distance to angular size', comoving_to_deg],
-        'deg_to_comoving': ['Convert angular size to comoving distance', deg_to_comoving],
-        'deg2_to_comoving_area': ['Convert angular area to comoving area', deg2_to_comoving_area],
-        'deg2_to_comoving_volume': ['Convert angular area to comoving volume', deg2_to_comoving_volume],
-        'comoving_to_proper': ['Convert comoving distance to proper distance', comoving_to_proper],
-        'proper_to_comoving': ['Convert proper distance to comoving distance', proper_to_comoving],
-        'photon_unit_conversion': ['Convert between different photon units', photon_unit_conversion],
-    }
-
-    parser = argparse.ArgumentParser(description='Cosmology Calculator Tool, by Jiten Dhandha')
-    parser.add_argument('-f','--function', type=str, nargs='?',
-                        help=f'Function to calculate: {", ".join(functions.keys())}', required=True)
-    parser.add_argument('-c','--cosmology', type=str, nargs='?',
-                        default='Planck18', 
-                        help='Name of the cosmology to use (default: Planck18, options: Planck18, Planck15, Planck13, WMAP9, WMAP7)')
-    parser.add_argument('-z','--redshift', type=str, nargs='?',
-                        help="First input redshift (in case of z_to_tage, 'imp' or 'plot' options are also accepted)")
-    parser.add_argument('-z2','--redshift2', type=str, nargs='?',
-                        help="Second input redshift (for volume calculations)")
-    parser.add_argument('-t','--tage', type=str, nargs='?',
-                        help='Age of the Universe in Myr')
-    parser.add_argument('-x','--comoving', type=str, nargs='?',
-                        help='Comoving distance in Mpc')
-    parser.add_argument('-y','--proper', type=str, nargs='?',
-                        help='Proper distance in Mpc')
-    parser.add_argument('-theta','--angular_sep', type=str, nargs='?',
-                        help='Angular size in deg')
-    parser.add_argument('-omega','--angular_area', type=str, nargs='?',
-                        help='Angular area in deg^2')
-    parser.add_argument('-p','--photon_unit_str', type=str, nargs='?',
-                        help='Photon unit conversion input string, e.g. "21 cm to MHz" (spaces required)')
-    args = parser.parse_args()
-    cosmo = set_cosmo(args.cosmology)
-    
-    if args.function not in functions:
-        raise ValueError(f"Invalid function. Please choose one of the following: {', '.join(functions.keys())}")
-    else:
-        f = functions[args.function][1]
-        if args.function == 'z_to_tage':
-            f(cosmo, args.redshift)
-        elif args.function == 'tage_to_z':
-            f(cosmo, args.tage)
-        elif args.function == 'time_between_z':
-            f(cosmo, args.redshift, args.redshift2)
-        elif args.function == 'comoving_to_deg':
-            f(cosmo, args.redshift, args.comoving)
-        elif args.function == 'deg_to_comoving':
-            f(cosmo, args.redshift, args.angular_sep)
-        elif args.function == 'deg2_to_comoving_area':
-            f(cosmo, args.redshift, args.angular_area)
-        elif args.function == 'deg2_to_comoving_volume':
-            f(cosmo, args.redshift, args.redshift2, args.angular_area)
-        elif args.function == 'comoving_to_proper':
-            f(cosmo, args.redshift, args.comoving)
-        elif args.function == 'proper_to_comoving':
-            f(cosmo, args.redshift, args.proper)
-        elif args.function == 'H_at_z':
-            f(cosmo, args.redshift)
-        elif args.function == 'photon_unit_conversion':
-            f(args.photon_unit_str)
-        elif args.function == 'print_cosmo':
-            f(cosmo)
-        
-    plt.show()
     
 if __name__ == '__main__':
-    main()
+    app()
