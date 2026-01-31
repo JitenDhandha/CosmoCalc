@@ -12,28 +12,36 @@ This is a simple command line tool for printing the cosmological parameters or c
 * Angular area to comoving volume
 * Comoving length to proper length at a given redshift
 * Proper length to comoving length at a given redshift
+* Photon unit conversions
 
-It is written in Python and uses the `astropy` library for cosmological calculations. The cosmologies supported currently are: WMAP7, WMAP9, Planck13, Planck15, Planck18.
+The code is written in Python and uses the `astropy` library for cosmological calculations. The cosmologies supported currently are: WMAP7, WMAP9, Planck13, Planck15, Planck18. The command line interface is built using the `cyclopts` and `rich` libraries.
 
 ## Installation and usage
 
-To install CosmoCalc, clone this repository in a directory of your choice and add the following line to your startup bash script (e.g. `.bashrc` or `.bash_profile` or `.zshrc`):
+1. Navigate to the directory where you want to install CosmoCalc and clone the repository:
+```
+git clone https://github.com/JitenDhandha/CosmoCalc.git
+```
 
+2. Make sure you have Python 3 installed along with the required packages. You can install the required packages using pip:
+```
+pip install numpy astropy matplotlib cyclopts
+```
+
+3. Add an alias to your terminal startup script (e.g. `.bashrc`, `.bash_profile`, or `.zshrc`) to easily run the tool from anywhere:
 ```
 alias cosmocalc="python {directory}/CosmoCalc/cosmocalc.py"
 ```
 
-Now, from anywhere in your terminal, you can run the command `cosmocalc` to calculate cosmological quantities, such as:
-
+4. You're all set! Now, you should be able to use CosmoCalc from your terminal. Test the installation by running:
 ```
-cosmocalc --function "z_to_tage" --redshift 20 --cosmology Planck18
-cosmocalc -f "z_to_tage" -z 20 -c Planck18
+cosmocalc --help
 ```
 
-Both are equivalent and will calculate the age of the universe at redshift 20 using the Planck 2018 cosmology. You can also use the `--help` flag to see all available options. Instead of supplying numbers, you can also supply strings with math operations, such as:
+5. Here are some example commands you can run, with math operations supported via strings:
 
 ```
-cosmocalc -f "time_between_z" -z "1080-80/2" -z2 "1080+80/2"
+cosmocalc z-to-tage --redshift 1080 --cosmology Planck18
+cosmocalc z-to-tage -z 1080 -c Planck18
+cosmocalc -f time-between-z -z1 "1080-80/2" -z2 "1080+80/2"
 ```
-
-which is roughly the duration of the Recombination event!
