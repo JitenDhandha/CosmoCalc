@@ -41,7 +41,7 @@ cosmocalc --help
 5. Here are some example commands you can run, with math operations supported via strings:
 
 ```
-cosmocalc z-to-tage --redshift 1080 --cosmology Planck18
-cosmocalc z-to-tage -z 1080 -c Planck18
-cosmocalc time-between-z -z1 "1080-80/2" -z2 "1080+80/2"
+cosmocalc z_to_tage --redshift 1080 --cosmology Planck18
+cosmocalc z_to_tage -z 1080 -c Planck18
+cosmocalc time_between_z -z1 "1080-80/2" -z2 "1080+80/2"
 ```

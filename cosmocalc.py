@@ -12,7 +12,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-app = App(help="Cosmology Calculator Tool, by Jiten Dhandha", help_format="rich", print_error=True)
+app = App(help="Cosmology Calculator Tool, by Jiten Dhandha", 
+          help_format="rich", 
+          name_transform=lambda s: s.replace('-', '_'))
 console = Console()
 
 class CLIError(Exception):
