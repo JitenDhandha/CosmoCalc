@@ -122,7 +122,7 @@ def z_to_tage(
         except (ValueError, TypeError, NameError):
             raise CLIError("Invalid redshift. Please provide a valid redshift, 'imp' or 'plot'")
     
-app.command  
+@app.command  
 def tage_to_z(
     tage: Annotated[str, Parameter(name=['-t', '--tage'])],
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
@@ -198,13 +198,13 @@ def H_at_z(
         raise CLIError("Invalid redshift. Please provide a valid redshift.")
 
 @app.command
-def comoving_to_deg(
+def comoving_length_to_deg(
     z: Annotated[str, Parameter(name=['-z', '--redshift'])],
     x: Annotated[str, Parameter(name=['-x', '--comoving_distance'])],
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert comoving distance (in Mpc) at a given redshift to angular size (in deg).
+    Convert comoving length (in Mpc) at a given redshift to angular size (in deg).
     
     Parameters
     ----------
@@ -226,13 +226,13 @@ def comoving_to_deg(
         raise CLIError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
  
 @app.command
-def deg_to_comoving(
+def deg_to_comoving_length(
     z: Annotated[str, Parameter(name=['-z', '--redshift'])],
     theta: Annotated[str, Parameter(name=['-t', '--angular_size'])],
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert angular size (in deg) at a given redshift to comoving distance (in Mpc).
+    Convert angular size (in deg) at a given redshift to comoving length (in Mpc).
     
     Parameters
     ----------
