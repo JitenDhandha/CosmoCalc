@@ -4,9 +4,27 @@ from astropy.cosmology import Planck18, Planck15, Planck13, WMAP9, WMAP7, FlatLa
 import astropy.cosmology.units as cu
 import astropy.units as u
 from cyclopts import App, Parameter
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 from typing import Annotated
 
 app = App(help="Cosmology Calculator Tool, by Jiten Dhandha", help_format="rich", print_error=True)
+console = Console()
+
+class CLIError(Exception):
+    def __init__(self, message: str, *, title: str = "Error"):
+        super().__init__(message)
+        self.message = message
+        self.title = title
+
+    def render(self):
+        return Panel(
+            Text(self.message),
+            title=self.title,
+            title_align="left",
+            border_style="red",
+        )
 
 def set_cosmo(cosmo_name):
     if cosmo_name == 'Planck18':
@@ -23,7 +41,7 @@ def set_cosmo(cosmo_name):
         try:
             cosmo = FlatLambdaCDM(eval(cosmo_name))
         except:
-            raise ValueError("Invalid cosmology name.")
+            raise CLIError("Invalid cosmology name.")
     return cosmo
     
 @app.command
@@ -99,7 +117,7 @@ def z_to_tage(
             tage = cosmo.age(z).to(u.Myr)
             print(f"z = {z}, tage = {tage:.4e}")
         except (ValueError, TypeError, NameError):
-            raise ValueError("Invalid redshift. Please provide a valid redshift, 'imp' or 'plot'")
+            raise CLIError("Invalid redshift. Please provide a valid redshift, 'imp' or 'plot'")
     
 app.command  
 def tage_to_z(
@@ -123,7 +141,7 @@ def tage_to_z(
         z = z_at_value(cosmo.age, tage)
         print(f"tage = {tage}, z = {z:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid age of the Universe. Please provide a valid age of the Universe in Myr.")    
+        raise CLIError("Invalid age of the Universe. Please provide a valid age of the Universe in Myr.")    
 
 @app.command
 def time_between_z(
@@ -151,7 +169,7 @@ def time_between_z(
         dt = np.abs(cosmo.age(z1).to(u.Myr) - cosmo.age(z2).to(u.Myr))
         print(f"z1 = {z1}, z2 = {z2}, dt = {dt:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshifts. Please provide valid redshifts.")
+        raise CLIError("Invalid redshifts. Please provide valid redshifts.")
 
 @app.command
 def H_at_z(
@@ -174,7 +192,7 @@ def H_at_z(
         Hz = cosmo.H(z)
         print(f"z = {z}, H(z) = {Hz:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift. Please provide a valid redshift.")
+        raise CLIError("Invalid redshift. Please provide a valid redshift.")
 
 @app.command
 def comoving_to_deg(
@@ -202,7 +220,7 @@ def comoving_to_deg(
         theta = theta.to(u.deg)
         print(f"z = {z}, x = {x}, theta = {theta:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
+        raise CLIError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
  
 @app.command
 def deg_to_comoving(
@@ -230,7 +248,7 @@ def deg_to_comoving(
         x = x.to(u.Mpc)
         print(f"z = {z}, theta = {theta:.4e}, x = {x:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift or angular size. Please provide a valid redshift and angular size.")
+        raise CLIError("Invalid redshift or angular size. Please provide a valid redshift and angular size.")
 
 @app.command
 def deg2_to_comoving_area(
@@ -259,7 +277,7 @@ def deg2_to_comoving_area(
         A = A.to(u.Mpc**2)
         print(f"z = {z}, omega = {omega:.4e}, A = {A:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift or angular area. Please provide a valid redshift and angular area.")
+        raise CLIError("Invalid redshift or angular area. Please provide a valid redshift and angular area.")
 
 @app.command
 def deg2_to_comoving_volume(
@@ -290,7 +308,7 @@ def deg2_to_comoving_volume(
         V = omega.to(u.steradian)/(4*np.pi*u.steradian) * abs(cosmo.comoving_volume(z1) - cosmo.comoving_volume(z2))
         print(f"z1 = {z1}, z2 = {z2}, omega = {omega:.4e}, V = {V:.4e}")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshifts or angular area. Please provide valid redshifts and angular area.")
+        raise CLIError("Invalid redshifts or angular area. Please provide valid redshifts and angular area.")
 
 @app.command
 def comoving_to_proper(
@@ -318,7 +336,7 @@ def comoving_to_proper(
         y = x * a
         print(f"z = {z}, x = {x:.4e} cMpc --> y = {y:.4e} pMpc")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
+        raise CLIError("Invalid redshift or comoving distance. Please provide a valid redshift and comoving distance.")
 
 @app.command
 def proper_to_comoving(
@@ -346,7 +364,7 @@ def proper_to_comoving(
         x = y / a
         print(f"z = {z}, y = {y:.4e} pMpc --> x = {x:.4e} cMpc")
     except (ValueError, TypeError, NameError):
-        raise ValueError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
+        raise CLIError("Invalid redshift or proper distance. Please provide a valid redshift and proper distance.")
 
 @app.command
 def photon_unit_conversion(
@@ -370,7 +388,10 @@ def photon_unit_conversion(
         converted_quantity = quantity.to(to_unit, equivalencies=u.spectral())
         print(f"{quantity} = {converted_quantity:.4e}")
     except (ValueError, TypeError, IndexError):
-        raise ValueError('Invalid photon unit conversion string. Please provide a valid conversion string, e.g. "21 cm to MHz" (spaces required).')
+        raise CLIError('Invalid photon unit conversion string. Please provide a valid conversion string, e.g. "21 cm to MHz" (spaces required).')
     
 if __name__ == '__main__':
-    app()
+    try:
+        app()
+    except CLIError as e:
+        console.print(e.render())
