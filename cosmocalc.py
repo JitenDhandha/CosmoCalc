@@ -392,9 +392,44 @@ def photon_unit_conversion(
         quantity = value * from_unit
         converted_quantity = quantity.to(to_unit, equivalencies=u.spectral())
         print(f"{quantity} = {converted_quantity:.4e}")
-    except (ValueError, TypeError, IndexError):
+    except:
         raise CLIError('Invalid photon unit conversion string. Please provide a valid conversion string, e.g. "21 cm to MHz" (spaces required).')
     
+@app.command
+def photon_redshifted(
+    photon_rd_str: Annotated[str, Parameter(name=['-p', '--photon_redshifted'])]
+):
+    """
+    Calculate the observed photon unit at z1, given the emitted photon unit at z2.
+    
+    Parameters
+    ----------
+    photon_rd_str : str
+        Photon redshifted string (e.g. "21 cm at z1=20 to z2=10", spaces required)
+    """
+    inputs = photon_rd_str.split(' ')
+    try:
+        from_value = float(eval(inputs[0]))
+        unit = u.Unit(inputs[1])
+        from_quantity = from_value * unit
+        z1 = float(eval(inputs[3].split('=')[1]))
+        z2 = float(eval(inputs[5].split('=')[1]))
+        if z1 < 0 or z2 < 0:
+            raise CLIError('Redshifts must be non-negative.')
+        if z1 < z2:
+            raise CLIError('z1 must be greater than or equal to z2.')
+        # If frequency, then it redshifts down, if wavelengt or energy, then it redshifts up
+        if from_quantity.unit.is_equivalent(u.Hz) or from_quantity.unit.is_equivalent(u.eV):
+            to_value = from_value * (1 + z2) / (1 + z1)
+        elif from_quantity.unit.is_equivalent(u.m):
+            to_value = from_value * (1 + z1) / (1 + z2)
+        else:
+            raise CLIError('Invalid photon unit. Please provide a valid photon unit (e.g. cm, m, Hz, eV).')
+        to_quantity = to_value * unit
+        print(f"{from_quantity} at z={z1} --> {to_quantity:.4e} at z={z2}")
+    except:
+        raise CLIError('Invalid photon redshifted string. Please provide a valid redshifted string, e.g. "21 cm at z1=20 to z2=10" (spaces required).')
+
 if __name__ == '__main__':
     try:
         app()
