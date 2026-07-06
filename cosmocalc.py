@@ -200,13 +200,59 @@ def H_at_z(
         raise CLIError("Invalid redshift. Please provide a valid redshift.")
 
 @app.command
+def z_to_comoving_distance(
+    z: Annotated[str, Parameter(name=['-z', '--redshift'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the comoving distance (in Mpc) at a given redshift.
+    
+    Parameters
+    ----------
+    z : str
+        Redshift value
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
+    try:
+        z = float(eval(z)) * cu.redshift
+        x = cosmo.comoving_distance(z).to(u.Mpc)
+        print(f"z = {z}, x = {x:.4e}")
+    except (ValueError, TypeError, NameError):
+        raise CLIError("Invalid redshift. Please provide a valid redshift.")
+    
+@app.command
+def comoving_distance_to_z(
+    x: Annotated[str, Parameter(name=['-x', '--comoving_distance'])],
+    cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
+):
+    """
+    Calculate the redshift at a given comoving distance (in Mpc).
+    
+    Parameters
+    ----------
+    x : str
+        Comoving distance in Mpc
+    cosmology : str
+        Cosmology model to use
+    """
+    cosmo = set_cosmo(cosmology)
+    try:
+        x = float(eval(x)) * u.Mpc
+        z = z_at_value(cosmo.comoving_distance, x)
+        print(f"x = {x}, z = {z:.4e}")
+    except (ValueError, TypeError, NameError):
+        raise CLIError("Invalid comoving distance. Please provide a valid comoving distance.")
+
+@app.command
 def comoving_length_to_deg(
     z: Annotated[str, Parameter(name=['-z', '--redshift'])],
     x: Annotated[str, Parameter(name=['-x', '--comoving_distance'])],
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert comoving length (in Mpc) at a given redshift to angular size (in deg).
+    Convert comoving length (in Mpc) on the sky at a given redshift to angular size (in deg).
     
     Parameters
     ----------
@@ -234,7 +280,7 @@ def deg_to_comoving_length(
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert angular size (in deg) at a given redshift to comoving length (in Mpc).
+    Convert angular size (in deg) on the sky at a given redshift to comoving length (in Mpc).
     
     Parameters
     ----------
@@ -262,7 +308,7 @@ def deg2_to_comoving_area(
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert angular area (in deg^2) to comoving area (in Mpc^2) at a given redshift.
+    Convert angular area (in deg^2) on the sky to comoving area (in Mpc^2) at a given redshift.
     
     Parameters
     ----------
@@ -292,7 +338,7 @@ def deg2_to_comoving_volume(
     cosmology: Annotated[str, Parameter(name=['-c', '--cosmology'])] = "Planck18"
 ):
     """
-    Convert angular area (in deg^2) between two redshifts to comoving volume (in Mpc^3).
+    Convert angular area (in deg^2) on the sky between two redshifts to comoving volume (in Mpc^3).
     
     Parameters
     ----------

@@ -6,12 +6,14 @@ This is a simple command line tool for printing the cosmological parameters or c
 * Age of the universe at a given redshift
 * Redshift at a given age of the universe
 * Time between two redshifts
-* Comoving length to angular degree
-* Angular degree to comoving length
-* Angular area to comoving area
-* Angular area to comoving volume
+* Comoving length to angular degree at a given redshift
+* Angular degree to comoving length at a given redshift
+* Angular area to comoving area at a given redshift
+* Angular area to comoving volume for a given redshift range
 * Comoving length to proper length at a given redshift
 * Proper length to comoving length at a given redshift
+* Comoving distance to redshift
+* Redshift to comoving distance
 * Photon unit conversions
 
 The code is written in Python and uses the `astropy` library for cosmological calculations. The cosmologies supported currently are: WMAP7, WMAP9, Planck13, Planck15, Planck18. The command line interface is built using the `cyclopts` and `rich` libraries.
